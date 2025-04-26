@@ -1,17 +1,17 @@
-from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage,StringVar,Label,Frame,N
+from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage,StringVar,Label,Frame
 import os
+from functions import paths , resizer 
+import cv2
+from threading import Thread
+from PIL import Image, ImageTk
+from functions import student_menue
 
 
 
-def resizer(x,mode):
-    if mode=='x':
-        return (x*window_size['x'])/1000
-    else:
-        return (x*window_size['y'])/1000
-def paths(x):
-    return os.path.join(os.getcwd(),x)
+    
 
-print(paths('button.png'))
+
+
 window = Tk()
 window.attributes("-fullscreen", True)
 
@@ -41,7 +41,7 @@ students_button = Button(
     image=students_button_image,
     borderwidth=0,
     highlightthickness=0,
-    command=lambda:print('students'),
+    command=student_menue,
     relief="flat",
     bg='white'
 )
