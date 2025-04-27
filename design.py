@@ -1,10 +1,31 @@
-from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage,StringVar,Label,Frame
-import os
+from tkinter import Tk, Canvas, Button, PhotoImage,Label,Frame
 from functions import paths , resizer 
-import cv2
-from PIL import Image, ImageTk
-from functions import student_menue
+from functions import student_menue , atab_stu
+from time import sleep
 
+def switch_to_student_menue():
+    student_menue()  # Assuming this function exists
+    print(atab_stu)  # Assuming atab_stu is properly initialized and contains 'present' list
+
+    # Create a label
+    l = Label(master=frame_start)
+    l.place(x=resizer(100, 'x'), y=resizer(500, 'y'))
+
+    index = 0  # Initialize the index to track the student
+    
+    # Function to update the label with delay
+    def update_label():
+        nonlocal index
+        if index < len(atab_stu['present']):
+            l.config(text=f'Welcome to Mositto {atab_stu["present"][index]}')  # Update text
+            index += 1
+            window.after(2000, update_label)  # Schedule next update after 2 seconds
+        else:
+            l.config(text='')  # Clear text after all students have been displayed
+            atab_stu['present'] = []  # Clear the 'present' list
+
+    # Start the label updates
+    update_label()
 
 
 
@@ -41,7 +62,7 @@ students_button = Button(
     image=students_button_image,
     borderwidth=0,
     highlightthickness=0,
-    command=student_menue,
+    command=switch_to_student_menue,
     relief="flat",
     bg='white'
 )
