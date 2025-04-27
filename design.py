@@ -2,13 +2,13 @@ from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage,StringVar,Label,
 import os
 from functions import paths , resizer 
 import cv2
-from threading import Thread
 from PIL import Image, ImageTk
 from functions import student_menue
 
 
 
-    
+
+
 
 
 
