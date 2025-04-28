@@ -13,8 +13,9 @@ model_path='../model.pt'
 print(model_path)
 model = YOLO(model_path)
 faces=[]
-path_of_dataset=os.getcwd()+'/data/images'
-data=os.listdir(path_of_dataset)
+path_of_students_dataset=os.getcwd()+'/students'
+print(path_of_students_dataset)
+students_images=os.listdir(path_of_students_dataset+'/images')
 atab_stu={'present': []}
 def check_faces(x):
     global faces
@@ -25,6 +26,10 @@ def check_faces(x):
     faces.append(x)
     return 1
 def face_detector():
+    from design import frame_start
+    from tkinter import Label
+    l = Label(master=frame_start)
+    l.place(x=resizer(100, 'x'), y=resizer(500, 'y'))
     global faces
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=4)
     faces = []
@@ -34,7 +39,7 @@ def face_detector():
         print("eror")
     else:
        start=time();
-       while(time()-start<=5):
+       while(time()-start<=2 ):
             ret, frame = cap.read()
             if ret:
                 frame=cv2.flip(frame,1)
@@ -67,7 +72,9 @@ def face_detector():
        
        cap.release()
        cv2.destroyAllWindows()
+       l.config(text='please wait . . .')  # Update text
        executor.shutdown(wait=True)
+       l.destroy()
 
     print(len(faces))
     for idx, crop in enumerate(faces):
@@ -81,17 +88,32 @@ def face_detector():
 
 
 def student_atab():
+    from design import frame_start
+    from tkinter import ttk
+    progress = ttk.Progressbar(master=frame_start, length=500, mode='determinate')
+    progress.place(x=resizer(100, 'x'), y=resizer(550, 'y'))  # You can adjust (x, y) as needed
+
+    total_tasks = len(faces) * len(students_images)
+    current_task = 0
     for i in range(len(faces)):
         if faces[i] is None or faces[i].size == 0:
             print(f"Face {i} is invalid, skipping...")
             continue
 
-        for j in data:
-            main_image = cv2.imread(path_of_dataset + f'/{j}')
+        for j in students_images:
+            main_image = cv2.imread(path_of_students_dataset + f'/images/{j}')
             if main_image is None:
                 print(f"Failed to load image {j}, skipping...")
                 continue
-
+            main_image = cv2.cvtColor(main_image, cv2.COLOR_BGR2RGB)
+            if faces[i] is not None and faces[i].size > 0:
+                if len(faces[i].shape) == 3 and faces[i].shape[2] == 3:  # check it's color image
+                    faces_rgb = cv2.cvtColor(faces[i], cv2.COLOR_BGR2RGB)
+                else:
+                    faces_rgb = faces[i]
+            else:
+                    print(f"Face {i} is invalid after loading, skipping...")
+                    continue
             try:
                 result = DeepFace.verify(main_image, faces[i])
                 if result['verified']:
@@ -99,7 +121,12 @@ def student_atab():
             except Exception as e:
                 print(f"Error verifying face {i} and image {j}: {e}")
                 continue  # Just skip this pair, don't restart!
-            
+            current_task += 1
+            progress['value'] = (current_task / total_tasks) * 100  # Update as percent
+            progress.update()
+
+
+    progress.destroy() 
 
             
             
