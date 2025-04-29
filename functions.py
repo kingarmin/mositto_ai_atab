@@ -8,14 +8,20 @@ import numpy as np
 import concurrent.futures
 from time import time
 import os
+import tkinter as tk
+from tkinter import ttk
 #model_path = hf_hub_download(repo_id="arnabdhar/YOLOv8-Face-Detection", filename="model.pt")
 model_path='../model.pt'
 print(model_path)
 model = YOLO(model_path)
 faces=[]
 path_of_students_dataset=os.getcwd()+'/students'
-print(path_of_students_dataset)
+path_of_teachers_dataset=os.getcwd()+'/teachers'
 students_images=os.listdir(path_of_students_dataset+'/images')
+teachers_images=os.listdir(path_of_teachers_dataset+'/images')
+manager_face_check_list=[]
+manager_input_value = None
+manager_selected_item = None
 atab_stu={'present': []}
 def check_faces(x):
     global faces
@@ -25,7 +31,7 @@ def check_faces(x):
             return 0
     faces.append(x)
     return 1
-def face_detector():
+def face_detector(mode):
     from design import frame_start
     from tkinter import Label
     l = Label(master=frame_start)
@@ -84,7 +90,10 @@ def face_detector():
             if key == ord('q'):   
                 break
     cv2.destroyAllWindows()
-    student_atab()
+    if mode=='students':
+        student_atab()
+    elif mode == 'teachers':
+        teacher_atab()
 
 
 def student_atab():
@@ -129,14 +138,80 @@ def student_atab():
     progress.destroy() 
 
             
-            
+def teacher_atab():
+    from design import frame_start
+    from tkinter import ttk
+    progress = ttk.Progressbar(master=frame_start, length=500, mode='determinate')
+    progress.place(x=resizer(100, 'x'), y=resizer(550, 'y'))  # You can adjust (x, y) as needed
+
+    total_tasks = len(faces) * len(teachers_images)
+    current_task = 0
+    for i in range(len(faces)):
+        if faces[i] is None or faces[i].size == 0:
+            print(f"Face {i} is invalid, skipping...")
+            continue
+
+        for j in teachers_images:
+            main_image = cv2.imread(path_of_teachers_dataset + f'/images/{j}')
+            if main_image is None:
+                print(f"Failed to load image {j}, skipping...")
+                continue
+            main_image = cv2.cvtColor(main_image, cv2.COLOR_BGR2RGB)
+            if faces[i] is not None and faces[i].size > 0:
+                if len(faces[i].shape) == 3 and faces[i].shape[2] == 3:  # check it's color image
+                    faces_rgb = cv2.cvtColor(faces[i], cv2.COLOR_BGR2RGB)
+                else:
+                    faces_rgb = faces[i]
+            else:
+                    print(f"Face {i} is invalid after loading, skipping...")
+                    continue
+            try:
+                result = DeepFace.verify(main_image, faces[i])
+                if result['verified']:
+                    atab_stu['present'].append(j.split(sep='.')[0])
+            except Exception as e:
+                print(f"Error verifying face {i} and image {j}: {e}")
+                continue  # Just skip this pair, don't restart!
+            current_task += 1
+            progress['value'] = (current_task / total_tasks) * 100  # Update as percent
+            progress.update()
 
 def student_menue():
     global faces
     global atab_stu
     atab_stu['present']=[]
     faces=[]
-    face_detector()
+    face_detector('students')
+
+def teacher_menu():
+    global faces
+    global atab_stu
+    atab_stu['present']=[]
+    faces=[]
+    face_detector('teachers')
+
+def manager_menu():
+    import tkinter as tk
+    from design import window
+
+    def on_submit():
+        global manager_input_value
+        manager_input_value = entry.get()
+        entry_window.destroy()
+
+    entry_window = tk.Toplevel(window)
+    entry_window.title("manager menu")
+    entry_window.geometry("300x100")
+
+    label = tk.Label(entry_window, text="Please enter your input:")
+    label.pack(pady=5)
+
+    entry = tk.Entry(entry_window, width=40)
+    entry.pack(pady=5)
+    entry.focus_set()
+
+    submit_button = tk.Button(entry_window, text="Submit", command=on_submit)
+    submit_button.pack(pady=5)
     
 def resizer(x,mode):
     from design import window_size
@@ -145,5 +220,7 @@ def resizer(x,mode):
     else:
         return (x*window_size['y'])/1000
 def paths(x):
+    return os.path.join(os.getcwd(),x)
+
     return os.path.join(os.getcwd(),x)
 

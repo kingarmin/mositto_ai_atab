@@ -1,36 +1,45 @@
 from tkinter import Tk, Canvas, Button, PhotoImage,Label,Frame
 from functions import paths , resizer 
-from functions import student_menue , atab_stu
+from functions import student_menue , atab_stu , teacher_menu , manager_menu
 from time import sleep
 
 def switch_to_student_menue():
-    student_menue()  # Assuming this function exists
-    print(atab_stu)  # Assuming atab_stu is properly initialized and contains 'present' list
-
-    # Create a label
+    student_menue() 
     l = Label(master=frame_start)
     l.place(x=resizer(100, 'x'), y=resizer(500, 'y'))
-
-    index = 0  # Initialize the index to track the student
-    
-    # Function to update the label with delay
+    index = 0  
     def update_label():
         nonlocal index
         if index < len(atab_stu['present']):
-            l.config(text=f'Welcome to Mositto {atab_stu["present"][index]}')  # Update text
+            l.config(text=f'Welcome to Mositto {atab_stu["present"][index]}') 
             index += 1
-            window.after(2000, update_label)  # Schedule next update after 2 seconds
+            window.after(2000, update_label)  
         else:
-            l.config(text='')  # Clear text after all students have been displayed
-            atab_stu['present'] = []  # Clear the 'present' list
-
-    # Start the label updates
+            l.config(text='')  
+            atab_stu['present'] = []  
     update_label()
 
 
+def switch_to_teacher_menue():
+    teacher_menu()  
+    print(atab_stu)  
+    l = Label(master=frame_start)
+    l.place(x=resizer(100, 'x'), y=resizer(500, 'y'))
 
+    index = 0 
+    def update_label():
+        nonlocal index
+        if index < len(atab_stu['present']):
+            l.config(text=f'Welcome to Mositto {atab_stu["present"][index]}')  
+            index += 1
+            window.after(2000, update_label)  
+        else:
+            l.config(text='')  
+            atab_stu['present'] = []  
+    update_label()
 
-
+def switch_to_manager_mode():
+    manager_menu()
 
 
 window = Tk()
@@ -79,7 +88,7 @@ teachers_button = Button(
     image=teachers_button_image,
     borderwidth=0,
     highlightthickness=0,
-    command=lambda:print('teachers'),
+    command=switch_to_teacher_menue,
     relief="flat",
     bg='white'
 )
@@ -96,7 +105,7 @@ managers_button = Button(
     image=managers_button_image,
     borderwidth=0,
     highlightthickness=0,
-    command=lambda:print('managers'),
+    command=switch_to_manager_mode,
     relief="flat",
     bg='white'
 )
