@@ -94,7 +94,35 @@ def face_detector(mode):
         student_atab()
     elif mode == 'teachers':
         teacher_atab()
+    elif mode=='managers':
+        print(manager_add_person())
+#cv2.cvtColor(main_image, cv2.COLOR_BGR2RGB)
+def manager_add_person():
+    global manager_face_check_list
+    if manager_selected_item=='students':
+        manager_face_check_list=students_images
+        manager_face_check_list = [
+            cv2.cvtColor(cv2.imread(path_of_students_dataset + f'/images/{i}'),cv2.COLOR_BGR2RGB) if i.split(sep='.')[0] != manager_input_value else 'bug'
+            for i in manager_face_check_list
+        ]
+    else:
+        manager_face_check_list=teachers_images
+        manager_face_check_list = [
+            cv2.cvtColor(cv2.imread(path_of_teachers_dataset + f'/images/{i}'),cv2.COLOR_BGR2RGB) if i.split(sep='.')[0] != manager_input_value else 'bug'
+            for i in manager_face_check_list
+        ]
+    if 'bug' in manager_face_check_list:
+        return 0
+    else:
+        for i in faces:
+            for j in manager_face_check_list:
+                result=DeepFace.verify(img1_path=i , img2_path=j)
+                if result['verified']:
+                    return 0
+        return 1
+            
 
+    
 
 def student_atab():
     from design import frame_start
@@ -194,17 +222,23 @@ def manager_menu():
     import tkinter as tk
     from design import window
 
+    def select_teachers():
+        global manager_selected_item
+        manager_selected_item = "teachers"
+
+    def select_students():
+        global manager_selected_item
+        manager_selected_item = "students"
+
     def on_submit():
         global manager_input_value
-        global manager_selected_item
         manager_input_value = entry.get()
-        manager_selected_item = selected_option.get()
-        entry_window.destroy()
-        face_detector('manager')
+        entry_window.destroy() 
+        face_detector('managers') 
 
     entry_window = tk.Toplevel(window)
     entry_window.title("manager menu")
-    entry_window.geometry("300x180")
+    entry_window.geometry("300x300")
 
     label = tk.Label(entry_window, text="Please enter your input:")
     label.pack(pady=5)
@@ -213,18 +247,19 @@ def manager_menu():
     entry.pack(pady=5)
     entry.focus_set()
 
-    selected_option = tk.StringVar(value="teachers")
+    # Button for "teachers"
+    teachers_button = tk.Button(entry_window, text="Teachers", command=select_teachers, width=20)
+    teachers_button.pack(pady=10)
 
-    teachers_radio = tk.Radiobutton(entry_window, text="teachers", variable=selected_option, value="teachers")
-    teachers_radio.pack()
+    # Button for "students"
+    students_button = tk.Button(entry_window, text="Students", command=select_students, width=20)
+    students_button.pack(pady=10)
 
-    students_radio = tk.Radiobutton(entry_window, text="students", variable=selected_option, value="students")
-    students_radio.pack()
+    # Submit button
+    submit_button = tk.Button(entry_window, text="Submit", command=on_submit, width=20)
+    submit_button.pack(pady=10)
 
-    submit_button = tk.Button(entry_window, text="Submit", command=on_submit)
-    submit_button.pack(pady=5)
-   
-    
+    entry_window.wait_window()
 def resizer(x,mode):
     from design import window_size
     if mode=='x':
@@ -232,7 +267,5 @@ def resizer(x,mode):
     else:
         return (x*window_size['y'])/1000
 def paths(x):
-    return os.path.join(os.getcwd(),x)
-
     return os.path.join(os.getcwd(),x)
 
