@@ -196,12 +196,15 @@ def manager_menu():
 
     def on_submit():
         global manager_input_value
+        global manager_selected_item
         manager_input_value = entry.get()
+        manager_selected_item = selected_option.get()
         entry_window.destroy()
+        face_detector('manager')
 
     entry_window = tk.Toplevel(window)
     entry_window.title("manager menu")
-    entry_window.geometry("300x100")
+    entry_window.geometry("300x180")
 
     label = tk.Label(entry_window, text="Please enter your input:")
     label.pack(pady=5)
@@ -210,8 +213,17 @@ def manager_menu():
     entry.pack(pady=5)
     entry.focus_set()
 
+    selected_option = tk.StringVar(value="teachers")
+
+    teachers_radio = tk.Radiobutton(entry_window, text="teachers", variable=selected_option, value="teachers")
+    teachers_radio.pack()
+
+    students_radio = tk.Radiobutton(entry_window, text="students", variable=selected_option, value="students")
+    students_radio.pack()
+
     submit_button = tk.Button(entry_window, text="Submit", command=on_submit)
     submit_button.pack(pady=5)
+   
     
 def resizer(x,mode):
     from design import window_size
