@@ -95,7 +95,9 @@ def face_detector(mode):
     elif mode == 'teachers':
         teacher_atab()
     elif mode=='managers':
-        print(manager_add_person())
+        sitch=manager_add_person()
+        if sitch[0]:
+            add_image(manager_selected_item,sitch[1])
 #cv2.cvtColor(main_image, cv2.COLOR_BGR2RGB)
 def manager_add_person():
     global manager_face_check_list
@@ -112,16 +114,27 @@ def manager_add_person():
             for i in manager_face_check_list
         ]
     if 'bug' in manager_face_check_list:
-        return 0
+        return [0]
     else:
         for i in faces:
             for j in manager_face_check_list:
                 result=DeepFace.verify(img1_path=i , img2_path=j)
                 if result['verified']:
-                    return 0
-        return 1
+                    return [0]
+            return[1,i]
             
+def add_image(mode , sitch):
+    global students_images
+    global teachers_images
+    if mode == 'students':
+        cv2.imwrite(path_of_students_dataset + f'/images/{manager_input_value}.jpg', sitch)
+        students_images=os.listdir(path_of_students_dataset+'/images')
+    else:
+        cv2.imwrite(path_of_teachers_dataset + f'/images/{manager_input_value}.jpg', sitch)
+        teachers_images=os.listdir(path_of_teachers_dataset+'/images')
+    
 
+    
     
 
 def student_atab():
